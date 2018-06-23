@@ -1,17 +1,12 @@
 package com.pkproject.internetcourse.application.main;
 
 import com.pkproject.internetcourse.application.controller.MainController;
-import com.pkproject.internetcourse.application.controller.settings.AccountSettingsController;
-import com.pkproject.internetcourse.application.controller.trainee.TestController;
-import com.pkproject.internetcourse.application.datebase.DBCreate;
-import com.pkproject.internetcourse.application.datebase.Operation;
-import com.pkproject.internetcourse.application.main.InternetCourseMain.ExceptionHandler;
-import com.pkproject.internetcourse.application.menu.TraineeController;
+import com.pkproject.internetcourse.application.datebase.DBCreateMysql;
+import com.pkproject.internetcourse.application.datebase.DBCreatePostgres;
 import com.pkproject.internetcourse.application.utils.DialogsUtils;
 
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
@@ -26,7 +21,8 @@ import java.sql.SQLException;
 public class InternetCourseMain extends Application{
 
 	public InternetCourseMain() throws SQLException {
-		new DBCreate().createDB();
+		new DBCreateMysql().createDB();
+		new DBCreatePostgres().createDB();
 	}
 
     public static void main(String [] args) {

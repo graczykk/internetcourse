@@ -1,7 +1,6 @@
 package com.pkproject.internetcourse.application.datebase;
 
 import com.pkproject.internetcourse.application.account.Account;
-import com.pkproject.internetcourse.application.account.Trainee;
 import com.pkproject.internetcourse.application.mail.Mail;
 
 import java.sql.Connection;
@@ -14,14 +13,14 @@ import java.util.ArrayList;
  * Created by Piotr Fudala on 21.12.2016.
  */
 public class MailOperation {
-    private DBConnect dbConnect;
+    private DBConnectMysql dbConnectMysql;
     private PreparedStatement preparedStatement;
     private Connection connection;
     private String query;
 
     public MailOperation() {
-        dbConnect = new DBConnect();
-        connection = dbConnect.getConnection();
+        dbConnectMysql = new DBConnectMysql();
+        connection = dbConnectMysql.getConnection();
     }
     public ArrayList<Mail> inboxList(Account account) throws SQLException {
         ArrayList<Mail> mails = new ArrayList<>();

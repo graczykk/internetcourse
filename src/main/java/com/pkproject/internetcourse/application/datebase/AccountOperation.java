@@ -1,24 +1,21 @@
 package com.pkproject.internetcourse.application.datebase;
 
-import com.pkproject.internetcourse.application.account.Account;
-
 import java.sql.Connection;
 import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 
 /**
  * Created by Piotr Fudala on 21.01.2017.
  */
 public class AccountOperation {
-    private DBConnect dbConnect;
+    private DBConnectMysql dbConnectMysql;
     private PreparedStatement preparedStatement;
     private Connection connection;
     private String query;
 
     public AccountOperation() {
-        dbConnect = new DBConnect();
-        connection = dbConnect.getConnection();
+        dbConnectMysql = new DBConnectMysql();
+        connection = dbConnectMysql.getConnection();
     }
 
     public void deleteAccount(int id) throws SQLException {

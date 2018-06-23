@@ -1,7 +1,6 @@
 package com.pkproject.internetcourse.application.datebase;
 
 import com.pkproject.internetcourse.application.account.Account;
-import com.pkproject.internetcourse.application.mail.Mail;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -13,14 +12,14 @@ import java.util.ArrayList;
  * Created by Piotr Fudala on 21.12.2016.
  */
 public class LogOperation {
-    private DBConnect dbConnect;
+    private DBConnectMysql dbConnectMysql;
     private PreparedStatement preparedStatement;
     private Connection connection;
     private String query;
 
     public LogOperation() {
-        dbConnect = new DBConnect();
-        connection = dbConnect.getConnection();
+        dbConnectMysql = new DBConnectMysql();
+        connection = dbConnectMysql.getConnection();
     }
 
     public ArrayList<String> getAllLogs(Account account) throws SQLException {

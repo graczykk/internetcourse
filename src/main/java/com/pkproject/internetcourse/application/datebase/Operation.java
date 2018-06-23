@@ -1,31 +1,25 @@
 package com.pkproject.internetcourse.application.datebase;
 
 import com.pkproject.internetcourse.application.account.Account;
-import com.pkproject.internetcourse.application.account.Instructor;
 import com.pkproject.internetcourse.application.account.Trainee;
 import com.pkproject.internetcourse.application.exceptions.AuthenticationFailedException;
 import com.pkproject.internetcourse.application.exceptions.LoginAlreadyUsedException;
 
-import java.io.InputStream;
-import java.io.Reader;
-import java.math.BigDecimal;
-import java.net.URL;
 import java.sql.*;
 import java.util.ArrayList;
-import java.util.Calendar;
 
 /**
  * Created by Piotr Fudala on 21.12.2016.
  */
 public class Operation {
-    private DBConnect dbConnect;
+    private DBConnectMysql dbConnectMysql;
     private PreparedStatement preparedStatement;
     private Connection connection;
     private String query;
 
     public Operation() {
-        dbConnect = new DBConnect();
-        connection = dbConnect.getConnection();
+        dbConnectMysql = new DBConnectMysql();
+        connection = dbConnectMysql.getConnection();
     }
 
     public void lockAccount(int id) throws SQLException {

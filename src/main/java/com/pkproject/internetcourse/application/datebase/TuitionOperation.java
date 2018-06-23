@@ -1,11 +1,9 @@
 package com.pkproject.internetcourse.application.datebase;
 
 import com.pkproject.internetcourse.application.account.Account;
-import com.pkproject.internetcourse.application.account.Trainee;
 import com.pkproject.internetcourse.application.tuition.Course;
 import com.pkproject.internetcourse.application.tuition.Question;
 import com.pkproject.internetcourse.application.tuition.Test;
-import com.pkproject.internetcourse.application.tuition.Tuition;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -14,25 +12,30 @@ import java.util.ArrayList;
  * Created by  on 13.01.2017.
  */
 public class TuitionOperation {
-    private DBConnect dbConnect;
+    private DBConnectMysql dbConnectMysql;
+    private Connection mysqlConnection;
+    private DBConnectPostgres dbConnectPostgres;
+    private Connection postgressConnection;
+
     private PreparedStatement preparedStatement;
-    private Connection connection;
     private String query;
 
     public TuitionOperation() {
-        dbConnect = new DBConnect();
-        connection = dbConnect.getConnection();
+        dbConnectMysql = new DBConnectMysql();
+        mysqlConnection = dbConnectMysql.getConnection();
+        dbConnectPostgres = new DBConnectPostgres();
+        postgressConnection = dbConnectPostgres.getConnection();
     }
 
     public void changeData(int idCourse, String newSubject, String newText) throws SQLException {
         query = "update `internetcourse`.`Kurs` SET tematKursu=? where idKurs= ?";
-        preparedStatement = connection.prepareStatement(query);
+        preparedStatement = mysqlConnection.prepareStatement(query);
         preparedStatement.setString(1, newSubject);
         preparedStatement.setInt(2, idCourse);
         preparedStatement.executeUpdate();
 
         query = "update `internetcourse`.`Kurs` SET trescKursu= ? where idKurs=?";
-        preparedStatement = connection.prepareStatement(query);
+        preparedStatement = mysqlConnection.prepareStatement(query);
         preparedStatement.setString(1, newText);
         preparedStatement.setInt(2, idCourse);
         preparedStatement.executeUpdate();
@@ -44,7 +47,7 @@ public class TuitionOperation {
         query = "SELECT * FROM `internetcourse`.`test`\n" +
                 "join `internetcourse`.kurs on kurs.idKurs = test.idKurs\n";
 
-        preparedStatement = connection.prepareStatement(query);
+        preparedStatement = mysqlConnection.prepareStatement(query);
         ResultSet resultSet = preparedStatement.executeQuery();
 
         while (resultSet.next()) {
@@ -64,7 +67,7 @@ public class TuitionOperation {
         ArrayList<Course> courses = new ArrayList<>();
 
         query = "SELECT * FROM `internetcourse`.`kurs`\n";
-        preparedStatement = connection.prepareStatement(query);
+        preparedStatement = mysqlConnection.prepareStatement(query);
         ResultSet resultSet = preparedStatement.executeQuery();
 
         while (resultSet.next()) {
@@ -84,7 +87,7 @@ public class TuitionOperation {
                 "join `internetcourse`.kurs on kurs.idKurs = test.idKurs\n" +
                 " where poziomTestu =?";
 
-        preparedStatement = connection.prepareStatement(query);
+        preparedStatement = mysqlConnection.prepareStatement(query);
         preparedStatement.setString(1, level);
         ResultSet resultSet = preparedStatement.executeQuery();
 
@@ -105,7 +108,7 @@ public class TuitionOperation {
         query = "SELECT * FROM `internetcourse`.`kurs`\n" +
                 " where poziomKursu =?";
 
-        preparedStatement = connection.prepareStatement(query);
+        preparedStatement = mysqlConnection.prepareStatement(query);
         preparedStatement.setString(1, level);
         ResultSet resultSet = preparedStatement.executeQuery();
 
@@ -126,7 +129,7 @@ public class TuitionOperation {
                 "join `internetcourse`.pytanie on pytanie.idTest = test.idTest \n" +
                 " where test.idTest = ?";
 
-        preparedStatement = connection.prepareStatement(query);
+        preparedStatement = mysqlConnection.prepareStatement(query);
         preparedStatement.setInt(1, idTest);
         ResultSet resultSet = preparedStatement.executeQuery();
 
@@ -149,7 +152,7 @@ public class TuitionOperation {
         query = "INSERT INTO `internetcourse`.`Kurs` (`nazwaKursu`, `poziomKursu`, `tematKursu`, `trescKursu`)\n" +
                 "VALUES (?, ?, ?, ?)";
         System.out.println(course.getLevel());
-        preparedStatement = connection.prepareStatement(query, Statement.RETURN_GENERATED_KEYS);
+        preparedStatement = mysqlConnection.prepareStatement(query, Statement.RETURN_GENERATED_KEYS);
         preparedStatement.setString(1, course.getName());
         preparedStatement.setString(2, course.getLevel());
         preparedStatement.setString(3, course.getSubject());
@@ -168,7 +171,7 @@ public class TuitionOperation {
     private int insertTest(Test test, int idCourse) throws SQLException {
         query = "INSERT INTO `internetcourse`.`Test` (`idKurs`, `nazwaTestu`, `autorTestu`, `iloscPytan`, `poziomTestu`)\n" +
                 "VALUES (?, ?, ?, ?, ?);\n";
-        preparedStatement = connection.prepareStatement(query, Statement.RETURN_GENERATED_KEYS);
+        preparedStatement = mysqlConnection.prepareStatement(query, Statement.RETURN_GENERATED_KEYS);
         preparedStatement.setInt(1, idCourse);
         preparedStatement.setString(2, test.getName());
         preparedStatement.setString(3, "niewiem");
@@ -181,7 +184,7 @@ public class TuitionOperation {
     private int insertWynik(Account account, Test test) throws SQLException {
         query = "INSERT INTO `internetcourse`.`Wynik` (`nazwaTestu`, `nazwaUzytkownika`, `iloscPunktow`, `data`)\n" +
                 "VALUES (?, ?, ?, '2017-01-04 00:00:00');";
-        preparedStatement = connection.prepareStatement(query, Statement.RETURN_GENERATED_KEYS);
+        preparedStatement = mysqlConnection.prepareStatement(query, Statement.RETURN_GENERATED_KEYS);
         preparedStatement.setString(1, test.getName());
         preparedStatement.setString(2, account.getFullname());
         preparedStatement.setInt(3, test.getResult());
@@ -200,7 +203,7 @@ public class TuitionOperation {
 
         query = "INSERT INTO `internetcourse`.`RozwiazanyTest` (`idKonto`, `idTest`, `idWynik`)\n" +
                 "VALUES (?, ?, ?);";
-        preparedStatement = connection.prepareStatement(query);
+        preparedStatement = mysqlConnection.prepareStatement(query);
         preparedStatement.setInt(1, account.getIdAccount());
         preparedStatement.setInt(2, idTest);
         preparedStatement.setInt(3, idResult);
@@ -209,20 +212,32 @@ public class TuitionOperation {
     }
 
     private void storeQuestion(Question question, int idTest) {
-        query = "INSERT INTO `internetcourse`.`pytanie` (`idTest`, `tresc`, `odpowiedza`, `odpowiedzb`, `odpowiedzc`, `odpowiedzd`, `prawidlowaOdpowiedz`, `liczbaPunktow`) " +
-                "VALUES (?, ?, ?, ?, ?, ?, ?, ?);";
+
         try {
-            preparedStatement = connection.prepareStatement(query);
-            preparedStatement.setInt(1, idTest);
-            preparedStatement.setString(2, question.getQuestionName());
-            preparedStatement.setString(3, question.getAnswerText(Question.AnswerLetter.A));
-            preparedStatement.setString(4, question.getAnswerText(Question.AnswerLetter.B));
-            preparedStatement.setString(5, question.getAnswerText(Question.AnswerLetter.C));
-            preparedStatement.setString(6, question.getAnswerText(Question.AnswerLetter.D));
-            preparedStatement.setString(7, question.getCorrectAnswer().toString());
-            preparedStatement.setString(8, "1");
+            query = "SELECT nextval('questions.\"pytanie_sq\"')";
+            preparedStatement = postgressConnection.prepareStatement(query);
+            ResultSet resultSet = preparedStatement.executeQuery();
+            resultSet.next();
+            int pytanieId = resultSet.getInt(1);
+
+            query = "INSERT INTO questions.\"Pytanie\"(\n" +
+                    "\t\"idPytanie\", \"idTest\", tresc, \"odpowiedzA\", \"odpowiedzB\", \"odpowiedzC\", \"odpowiedzD\", \"prawidlowaOdpowiedz\", \"liczbaPunktow\")\n" +
+                    "\tVALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);";
+
+            preparedStatement = postgressConnection.prepareStatement(query);
+            preparedStatement.setInt(1, pytanieId);
+            preparedStatement.setInt(2, idTest);
+            preparedStatement.setString(3, question.getQuestionName());
+            preparedStatement.setString(4, question.getAnswerText(Question.AnswerLetter.A));
+            preparedStatement.setString(5, question.getAnswerText(Question.AnswerLetter.B));
+            preparedStatement.setString(6, question.getAnswerText(Question.AnswerLetter.C));
+            preparedStatement.setString(7, question.getAnswerText(Question.AnswerLetter.D));
+            preparedStatement.setString(8, question.getCorrectAnswer().toString());
+            preparedStatement.setString(9, "1");
+            System.out.println(preparedStatement);
             preparedStatement.executeUpdate();
         } catch (SQLException e) {
+            e.printStackTrace();
             throw new RuntimeException(e);
         }
 
@@ -236,7 +251,7 @@ public class TuitionOperation {
                 "join `internetcourse`.wynik on wynik.idWynik = rozwiazanytest.idWynik\n" +
                 "where konto.idKonto=" + account.getIdAccount();
 
-        preparedStatement = connection.prepareStatement(query);
+        preparedStatement = mysqlConnection.prepareStatement(query);
         ResultSet resultSet = preparedStatement.executeQuery();
         while (resultSet.next()) {
             Test test = new Test();
@@ -251,7 +266,7 @@ public class TuitionOperation {
     public void insertResult(Account account, Test test) throws SQLException {
         query = "INSERT INTO `internetcourse`.`wynik` ( `nazwaTestu`, `nazwaUzytkownika`, `iloscPunktow`, `data`) " +
                 "VALUES (?, ?, ?, '2017-01-04 00:00:00');";
-        preparedStatement = connection.prepareStatement(query);
+        preparedStatement = mysqlConnection.prepareStatement(query);
         preparedStatement.setString(1, test.getName());
         preparedStatement.setString(2, account.getFullname());
         preparedStatement.setInt(3, test.getResult());
@@ -259,7 +274,7 @@ public class TuitionOperation {
 
 
         query = "SELECT wynik.idWynik FROM `internetcourse`.wynik where nazwaTestu= ? AND nazwaUzytkownika=?";
-        preparedStatement = connection.prepareStatement(query);
+        preparedStatement = mysqlConnection.prepareStatement(query);
         preparedStatement.setString(1, test.getName());
         preparedStatement.setString(2, account.getFullname());
         ResultSet resultSet = preparedStatement.executeQuery();
@@ -270,7 +285,7 @@ public class TuitionOperation {
         }
 
         query = "INSERT INTO `internetcourse`.`rozwiazanytest` (`idKonto`, `idTest`, `idWynik`) VALUES (?, ?, ?);";
-        preparedStatement = connection.prepareStatement(query);
+        preparedStatement = mysqlConnection.prepareStatement(query);
         preparedStatement.setInt(1, account.getIdAccount());
         preparedStatement.setInt(2, test.getIdTest());
         preparedStatement.setInt(3, idWynik);
@@ -281,7 +296,7 @@ public class TuitionOperation {
     public Course getCourse(Course course) throws SQLException {
         query = "select kurs.tematKursu, kurs.trescKursu, kurs.idKurs from `internetcourse`.kurs " +
                 "where poziomKursu=? and nazwaKursu=?";
-        preparedStatement = connection.prepareStatement(query);
+        preparedStatement = mysqlConnection.prepareStatement(query);
         preparedStatement.setString(1, course.getLevel());
         preparedStatement.setString(2, course.getName());
         ResultSet resultSet = preparedStatement.executeQuery();
@@ -299,7 +314,7 @@ public class TuitionOperation {
         query = "select kurs.tematKursu, kurs.trescKursu, test.autorTestu from `internetcourse`.kurs \n" +
                 "join `internetcourse`.test on test.idKurs = kurs.idKurs\n" +
                 "where poziomKursu=? and nazwaKursu=? and test.autorTestu=?";
-        preparedStatement = connection.prepareStatement(query);
+        preparedStatement = mysqlConnection.prepareStatement(query);
         preparedStatement.setString(1, course.getLevel());
         preparedStatement.setString(2, course.getName());
         preparedStatement.setString(3, account.getFullname());
