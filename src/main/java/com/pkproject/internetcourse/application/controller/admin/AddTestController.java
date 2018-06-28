@@ -58,12 +58,12 @@ public class AddTestController implements Controller {
 
     @FXML
     public void addTest() throws IOException, SQLException {
-        if (currentQuestion < test.getNumberOfQuestion()) {
+        if (currentQuestion <= test.getNumberOfQuestion()) {
             test.addQuestion(readQuestion());
-            currentQuestion++;
             clearForm();
             currentQuestionLabel.setText("Current question: " + currentQuestion);
-        } else {
+        }
+        if (currentQuestion == test.getNumberOfQuestion()){
             disableForm();
             TuitionOperation tuitionOperation = new TuitionOperation();
             tuitionOperation.insertTuition(account, test, course);
@@ -73,6 +73,7 @@ public class AddTestController implements Controller {
             primaryController.setScreenAddress(screenAddress);
             changeController(primaryController);
         }
+        currentQuestion++;
     }
 
     private void disableForm() {

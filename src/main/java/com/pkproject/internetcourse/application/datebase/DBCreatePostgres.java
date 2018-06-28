@@ -6,17 +6,15 @@ import java.sql.SQLException;
 
 public class DBCreatePostgres {
 
-    private DBConnectPostgres dbConnectPostgres;
     private PreparedStatement preparedStatement;
     private Connection connection;
     private String query;
 
-    public DBCreatePostgres() {
-        dbConnectPostgres = new DBConnectPostgres();
+    public DBCreatePostgres(Connection connection) {
+        this.connection = connection;
     }
 
     public void createDB() throws SQLException {
-        connection = dbConnectPostgres.getConnection();
 
         query = "CREATE SCHEMA IF NOT EXISTS questions AUTHORIZATION postgres;";
         preparedStatement = connection.prepareStatement(query);

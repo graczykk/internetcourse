@@ -1,24 +1,39 @@
 package com.pkproject.internetcourse.application.datebase;
 
+import com.atomikos.jdbc.AtomikosDataSourceBean;
+
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.util.Properties;
 
 public class DBConnectPostgres {
-    String JDBC_DRIVER = "org.postgresql.Driver";
-    String DB_URL = "jdbc:postgresql:postgres";
-    String USER = "postgres";
-    String PASS = "postgres";
-    private Connection connection;
 
-    public Connection getConnection() {
-        try {
-            Class.forName(JDBC_DRIVER);
-            connection = DriverManager.getConnection(DB_URL, USER, PASS);
-        } catch (SQLException | ClassNotFoundException e) {
-            e.printStackTrace();
+    private static AtomikosDataSourceBean ds;
+    static final String USER = "postgres";
+    static final String PASS = "postgres";
+
+    public static Connection getConnection() {
+        if (ds == null) {
+            ds = new AtomikosDataSourceBean();
+            ds.setUniqueResourceName("postgres");
+            ds.setXaDataSourceClassName("org.postgresql.xa.PGXADataSource");
+            Properties p = new Properties();
+            p.setProperty ( "user" , USER );
+            p.setProperty ( "password" , PASS );
+            p.setProperty ( "serverName" , "localhost" );
+            p.setProperty ( "portNumber" , "5432" );
+            p.setProperty ( "databaseName" , "postgres" );
+            ds.setXaProperties ( p );
+            ds.setMaxPoolSize(50);
+            ds.setMinPoolSize(5);
         }
-        return connection;
+        try {
+            ds.getConnection();
+            return ds.getConnection();
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new RuntimeException(e);
+        }
     }
 
 }

@@ -15,7 +15,11 @@ public class AccountOperation {
 
     public AccountOperation() {
         dbConnectMysql = new DBConnectMysql();
-        connection = dbConnectMysql.getConnection();
+        try {
+            connection = dbConnectMysql.getConnection();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     public void deleteAccount(int id) throws SQLException {

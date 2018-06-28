@@ -20,7 +20,11 @@ public class MailOperation {
 
     public MailOperation() {
         dbConnectMysql = new DBConnectMysql();
-        connection = dbConnectMysql.getConnection();
+        try {
+            connection = dbConnectMysql.getConnection();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
     public ArrayList<Mail> inboxList(Account account) throws SQLException {
         ArrayList<Mail> mails = new ArrayList<>();

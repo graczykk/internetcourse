@@ -5,26 +5,25 @@ import com.pkproject.internetcourse.application.tuition.Course;
 import com.pkproject.internetcourse.application.tuition.Question;
 import com.pkproject.internetcourse.application.tuition.Test;
 
+import javax.transaction.*;
 import java.sql.*;
 import java.util.ArrayList;
 
-/**
- * Created by  on 13.01.2017.
- */
 public class TuitionOperation {
-    private DBConnectMysql dbConnectMysql;
     private Connection mysqlConnection;
-    private DBConnectPostgres dbConnectPostgres;
     private Connection postgressConnection;
 
     private PreparedStatement preparedStatement;
     private String query;
 
     public TuitionOperation() {
-        dbConnectMysql = new DBConnectMysql();
-        mysqlConnection = dbConnectMysql.getConnection();
-        dbConnectPostgres = new DBConnectPostgres();
-        postgressConnection = dbConnectPostgres.getConnection();
+        try {
+            mysqlConnection = DBConnectMysql.getConnection();
+            postgressConnection = DBConnectPostgres.getConnection();
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new RuntimeException(e);
+        }
     }
 
     public void changeData(int idCourse, String newSubject, String newText) throws SQLException {
@@ -194,20 +193,41 @@ public class TuitionOperation {
 
     public void insertTuition(Account account, Test test, Course course) throws SQLException {
 
-        int idCourse = insertCourse(course);
-        int idTest = insertTest(test, idCourse);
-        test.getQuestions()
-            .forEach(q -> storeQuestion(q, idTest));
+		TransactionManager tm = CustomTransactionManager.getTransactionManager();
+        try {
+            tm.begin();
+            mysqlConnection.setAutoCommit(false);
+            postgressConnection.setAutoCommit(false);
 
-        int idResult = insertWynik(account, test);
+            int idCourse = insertCourse(course);
+            int idTest = insertTest(test, idCourse);
+            test.getQuestions()
+                .forEach(q -> storeQuestion(q, idTest));
 
-        query = "INSERT INTO `internetcourse`.`RozwiazanyTest` (`idKonto`, `idTest`, `idWynik`)\n" +
-                "VALUES (?, ?, ?);";
-        preparedStatement = mysqlConnection.prepareStatement(query);
-        preparedStatement.setInt(1, account.getIdAccount());
-        preparedStatement.setInt(2, idTest);
-        preparedStatement.setInt(3, idResult);
-        preparedStatement.executeUpdate();
+            int idResult = insertWynik(account, test);
+
+            query = "INSERT INTO `internetcourse`.`RozwiazanyTest` (`idKonto`, `idTest`, `idWynik`)\n" +
+                    "VALUES (?, ?, ?);";
+            preparedStatement = mysqlConnection.prepareStatement(query);
+            preparedStatement.setInt(1, account.getIdAccount());
+            preparedStatement.setInt(2, idTest);
+            preparedStatement.setInt(3, idResult);
+            preparedStatement.executeUpdate();
+
+            tm.commit();
+        } catch (Exception e) {
+            try {
+                tm.rollback();
+            } catch (SystemException e1) {
+                e1.printStackTrace();
+                throw new RuntimeException(e1);
+            }
+            e.printStackTrace();
+            throw new RuntimeException(e);
+        } finally {
+            mysqlConnection.setAutoCommit(true);
+            postgressConnection.setAutoCommit(true);
+        }
 
     }
 

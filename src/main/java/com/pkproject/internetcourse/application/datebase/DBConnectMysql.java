@@ -1,26 +1,50 @@
 package com.pkproject.internetcourse.application.datebase;
 
 
-import java.sql.*;
+import com.atomikos.jdbc.AtomikosDataSourceBean;
+import com.mysql.cj.jdbc.MysqlXADataSource;
+
+import java.sql.Connection;
+import java.sql.SQLException;
 
 /**
- * Created by Piotr Fudala on 12.12.2016.
+ * Created by Piotr Fudala
  */
 public class DBConnectMysql {
-    String JDBC_DRIVER = "com.mysql.jdbc.Driver";
-    String DB_URL = "jdbc:mysql://localhost/";
-    String USER = "root";
-    String PASS = "root";
-    private Connection connection;
-    public Connection getConnection() {
-        try {
-            Class.forName(JDBC_DRIVER);
-            connection = DriverManager.getConnection(DB_URL, USER, PASS);
-        } catch (SQLException | ClassNotFoundException e) {
-            e.printStackTrace();
-            System.out.println("Too Many Connection");
+
+    private static AtomikosDataSourceBean ds;
+    private static MysqlXADataSource mysqlXADataSource;
+
+    static final String DB_URL = "jdbc:mysql://localhost/";
+    static final String USER = "root";
+    static final String PASS = "root";
+
+    public static Connection getConnection() {
+        if (mysqlXADataSource == null) {
+            mysqlXADataSource = new MysqlXADataSource();
+            mysqlXADataSource.setUrl(DB_URL);
+            mysqlXADataSource.setUser(USER);
+            mysqlXADataSource.setPassword(PASS);
+            try {
+                mysqlXADataSource.setPinGlobalTxToPhysicalConnection(true);
+                mysqlXADataSource.setServerTimezone("UTC");
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+
+            ds = new AtomikosDataSourceBean();
+            ds.setUniqueResourceName("mysql");
+            ds.setXaDataSource(mysqlXADataSource);
+            ds.setMinPoolSize(5);
+            ds.setMaxPoolSize(50);
         }
 
-        return connection;
+        try {
+            return ds.getConnection();
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new RuntimeException(e);
+        }
     }
+
 }

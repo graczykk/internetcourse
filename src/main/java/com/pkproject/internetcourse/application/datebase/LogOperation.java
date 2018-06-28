@@ -19,7 +19,11 @@ public class LogOperation {
 
     public LogOperation() {
         dbConnectMysql = new DBConnectMysql();
-        connection = dbConnectMysql.getConnection();
+        try {
+            connection = dbConnectMysql.getConnection();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     public ArrayList<String> getAllLogs(Account account) throws SQLException {

@@ -1,22 +1,23 @@
 package com.pkproject.internetcourse.application.datebase;
 
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 
 /**
- * Created by Piotr Fudala on 12.12.2016.
+ * Created by Piotr Fudala
  */
 public class DBCreateMysql {
-    private DBConnectMysql dbConnectMysql;
     private PreparedStatement preparedStatement;
     private Connection connection;
     private String query;
 
-    public DBCreateMysql() {
-        dbConnectMysql = new DBConnectMysql();
+    public DBCreateMysql(Connection connection) {
+        this.connection = connection;
     }
 
     public void createDB() throws SQLException {
-        connection = dbConnectMysql.getConnection();
+        connection = DBConnectMysql.getConnection();
 
         try {
             query = "CREATE DATABASE IF NOT EXISTS internetcourse DEFAULT CHARACTER SET utf8 " +
@@ -32,7 +33,6 @@ public class DBCreateMysql {
                     "\t`BlokadaKonta` BOOLEAN NOT NULL ,\n" +
                     " \tPRIMARY KEY (`idKonto`)\n" +
                     ");";
-
 
 
             preparedStatement = connection.prepareStatement(query);
@@ -119,16 +119,10 @@ public class DBCreateMysql {
             preparedStatement.execute();
 
             insertIntoDataBase();
+
         } catch (SQLException e) {
             e.printStackTrace();
-        } finally {
-            if (preparedStatement != null) {
-                preparedStatement.close();
-            }
-
-            if (connection != null) {
-                connection.close();
-            }
+            throw e;
         }
     }
 

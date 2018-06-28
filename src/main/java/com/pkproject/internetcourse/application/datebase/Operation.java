@@ -19,7 +19,11 @@ public class Operation {
 
     public Operation() {
         dbConnectMysql = new DBConnectMysql();
-        connection = dbConnectMysql.getConnection();
+        try {
+            connection = dbConnectMysql.getConnection();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     public void lockAccount(int id) throws SQLException {
